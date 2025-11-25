@@ -8,8 +8,7 @@
 	// Environment variables for Android SDK
 	"containerEnv": {
 		"ANDROID_HOME": "/opt/android-sdk",
-		"ANDROID_SDK_ROOT": "/opt/android-sdk",
-		"PATH": "${containerEnv:PATH}:/opt/android-sdk/platform-tools:/opt/android-sdk/build-tools/34.0.0:/opt/android-sdk/emulator:/opt/android-sdk/cmdline-tools/latest/bin"
+		"ANDROID_SDK_ROOT": "/opt/android-sdk"
 	},
 	
 	// VS Code customizations
