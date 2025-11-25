@@ -1,138 +1,106 @@
 # Ona Automations Configuration for Android Development
-# This file defines automated tasks that run at various lifecycle stages
+# Services are long-running processes, Tasks are one-time executions
 
-automations:
-  # Prebuild automation - runs during container build/cache phase
-  # Ensures SDK components are installed and Gradle cache is warmed
-  prebuild:
-    - name: "install-android-sdk-components"
-      description: "Install Android SDK platform tools, build tools, and system images"
-      run: |
-        set -e
-        echo "Installing Android SDK components..."
-        sdkmanager "platform-tools" \
-                   "platforms;android-34" \
-                   "platforms;android-33" \
-                   "build-tools;34.0.0" \
-                   "build-tools;33.0.2" \
-                   "ndk;26.1.10909125" \
-                   "system-images;android-34;google_apis;x86_64"
-        echo "Accepting all SDK licenses..."
-        yes | sdkmanager --licenses || true
-        echo "Android SDK components installed successfully"
-    
-    - name: "warm-gradle-cache"
-      description: "Pre-download Gradle dependencies to speed up first build"
-      run: |
-        set -e
-        if [ -f "./gradlew" ]; then
-          echo "Warming Gradle cache..."
-          ./gradlew tasks --quiet || ./gradlew tasks
-          echo "Gradle cache warmed successfully"
-        else
-          echo "No gradlew found, skipping Gradle cache warming"
-        fi
+services:
+    emulator:
+        name: Android Emulator
+        description: Android emulator running Pixel 6 API 34
+        commands:
+            start: emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim
 
-  # Workspace open automation - runs when workspace starts
-  # Validates that all required tools are available
-  onWorkspaceOpen:
-    - name: "validate-android-environment"
-      description: "Verify Android SDK, ADB, and Gradle are properly configured"
-      run: |
-        set -e
-        echo "=== Validating Android Development Environment ==="
-        
-        echo "Checking ADB..."
-        adb --version || { echo "❌ ADB not found"; exit 1; }
-        
-        echo "Checking SDK Manager..."
-        sdkmanager --version || { echo "❌ SDK Manager not found"; exit 1; }
-        
-        echo "Checking Java..."
-        java -version || { echo "❌ Java not found"; exit 1; }
-        
-        echo "Listing installed SDK components..."
-        sdkmanager --list_installed
-        
-        if [ -f "./gradlew" ]; then
-          echo "Checking Gradle..."
-          ./gradlew --version || { echo "❌ Gradle not working"; exit 1; }
-          echo "Listing Gradle tasks..."
-          ./gradlew tasks --quiet || ./gradlew tasks
-        else
-          echo "⚠️  No gradlew found in workspace root"
-        fi
-        
-        echo "✅ Android environment validation complete"
+tasks:
+    validateEnvironment:
+        name: Validate Android Environment
+        description: Verify Android SDK, ADB, and Gradle are properly configured
+        triggeredBy:
+            - postEnvironmentStart
+        command: |
+            set -e
+            echo "=== Validating Android Development Environment ==="
+            
+            echo "Checking ADB..."
+            adb --version || { echo "❌ ADB not found"; exit 1; }
+            
+            echo "Checking SDK Manager..."
+            sdkmanager --version || { echo "❌ SDK Manager not found"; exit 1; }
+            
+            echo "Checking Java..."
+            java -version || { echo "❌ Java not found"; exit 1; }
+            
+            echo "Listing installed SDK components..."
+            sdkmanager --list_installed
+            
+            if [ -f "./gradlew" ]; then
+              echo "Checking Gradle..."
+              ./gradlew --version || { echo "❌ Gradle not working"; exit 1; }
+              echo "Listing Gradle tasks..."
+              ./gradlew tasks --quiet || ./gradlew tasks
+            else
+              echo "⚠️  No gradlew found in workspace root"
+            fi
+            
+            echo "✅ Android environment validation complete"
     
-    - name: "display-environment-info"
-      description: "Display Android SDK and environment information"
-      run: |
-        echo "=== Android Development Environment ==="
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        echo "JAVA_HOME: $JAVA_HOME"
-        echo "PATH: $PATH"
-        echo "======================================"
-
-  # Custom command automations
-  onCommand:
-    - name: "run-emulator"
-      command: "emulator-run"
-      description: "Start the Android emulator with the default AVD"
-      run: |
-        set -e
-        echo "Starting Android emulator..."
-        emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim &
-        echo "Emulator starting in background. Use 'adb devices' to check status."
+    displayEnvironmentInfo:
+        name: Display Environment Info
+        description: Display Android SDK and environment information
+        triggeredBy:
+            - postEnvironmentStart
+        dependsOn:
+            - validateEnvironment
+        command: |
+            echo "=== Android Development Environment ==="
+            echo "ANDROID_HOME: $ANDROID_HOME"
+            echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+            echo "JAVA_HOME: $JAVA_HOME"
+            echo "======================================"
     
-    - name: "list-devices"
-      command: "adb-devices"
-      description: "List connected Android devices and emulators"
-      run: |
-        adb devices -l
+    buildDebug:
+        name: Build Debug APK
+        description: Build the Android app in debug mode
+        command: |
+            set -e
+            if [ -f "./gradlew" ]; then
+              ./gradlew assembleDebug
+            else
+              echo "❌ No gradlew found. Please create an Android project first."
+              exit 1
+            fi
     
-    - name: "build-debug"
-      command: "build-debug"
-      description: "Build the Android app in debug mode"
-      run: |
-        set -e
-        if [ -f "./gradlew" ]; then
-          ./gradlew assembleDebug
-        else
-          echo "❌ No gradlew found. Please create an Android project first."
-          exit 1
-        fi
+    buildRelease:
+        name: Build Release APK
+        description: Build the Android app in release mode
+        command: |
+            set -e
+            if [ -f "./gradlew" ]; then
+              ./gradlew assembleRelease
+            else
+              echo "❌ No gradlew found. Please create an Android project first."
+              exit 1
+            fi
     
-    - name: "build-release"
-      command: "build-release"
-      description: "Build the Android app in release mode"
-      run: |
-        set -e
-        if [ -f "./gradlew" ]; then
-          ./gradlew assembleRelease
-        else
-          echo "❌ No gradlew found. Please create an Android project first."
-          exit 1
-        fi
+    clean:
+        name: Clean Build
+        description: Clean the Gradle build cache
+        command: |
+            set -e
+            if [ -f "./gradlew" ]; then
+              ./gradlew clean
+            else
+              echo "❌ No gradlew found. Please create an Android project first."
+              exit 1
+            fi
     
-    - name: "clean-build"
-      command: "clean"
-      description: "Clean the Gradle build cache"
-      run: |
-        set -e
-        if [ -f "./gradlew" ]; then
-          ./gradlew clean
-        else
-          echo "❌ No gradlew found. Please create an Android project first."
-          exit 1
-        fi
+    updateSdk:
+        name: Update Android SDK
+        description: Update Android SDK components to latest versions
+        command: |
+            set -e
+            echo "Updating Android SDK..."
+            sdkmanager --update
+            echo "SDK updated successfully"
     
-    - name: "update-sdk"
-      command: "update-sdk"
-      description: "Update Android SDK components to latest versions"
-      run: |
-        set -e
-        echo "Updating Android SDK..."
-        sdkmanager --update
-        echo "SDK updated successfully"
+    listDevices:
+        name: List Android Devices
+        description: List connected Android devices and emulators
+        command: adb devices -l
