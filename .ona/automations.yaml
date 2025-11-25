@@ -94,5 +94,5 @@ tasks:
     
     listDevices:
         name: List Android Devices
-        description: List connected Android devices and emulators
+        description: List connected Android devices
         command: adb devices -l
