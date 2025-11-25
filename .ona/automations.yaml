@@ -1,12 +1,4 @@
 # Ona Automations Configuration for Android Development
-# Services are long-running processes, Tasks are one-time executions
-
-services:
-    emulator:
-        name: Android Emulator
-        description: Android emulator running Pixel 6 API 34
-        commands:
-            start: emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim
 
 tasks:
     validateEnvironment:

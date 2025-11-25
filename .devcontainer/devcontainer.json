@@ -5,21 +5,18 @@
 		"dockerfile": "Dockerfile"
 	},
 	
-	// Environment variables for Android SDK
 	"containerEnv": {
 		"ANDROID_HOME": "/opt/android-sdk",
 		"ANDROID_SDK_ROOT": "/opt/android-sdk"
 	},
 	
-	// VS Code customizations
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"mathiasfrohlich.Kotlin",
 				"vscjava.vscode-java-pack",
 				"vscjava.vscode-gradle",
-				"redhat.java",
-				"naco-siren.gradle-language"
+				"redhat.java"
 			],
 			"settings": {
 				"java.configuration.updateBuildConfiguration": "automatic",
@@ -28,7 +25,6 @@
 		}
 	},
 	
-	// Forward ADB port for device debugging
 	"forwardPorts": [5037],
 	"portsAttributes": {
 		"5037": {
@@ -37,16 +33,5 @@
 		}
 	},
 	
-	// Lifecycle commands
-	"postCreateCommand": {
-		"accept-licenses": "yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true",
-		"install-sdk": "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0' || true",
-		"info": "echo '✅ Android SDK setup complete'"
-	},
-	
-	// Container user
-	"remoteUser": "vscode",
-	
-	// Keep container running
-	"overrideCommand": false
+	"remoteUser": "vscode"
 }
