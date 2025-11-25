@@ -1,0 +1,56 @@
+{
+	"name": "Android Development Environment",
+	"build": {
+		"context": ".",
+		"dockerfile": "Dockerfile"
+	},
+	
+	// Environment variables for Android SDK
+	"containerEnv": {
+		"ANDROID_HOME": "/opt/android-sdk",
+		"ANDROID_SDK_ROOT": "/opt/android-sdk",
+		"PATH": "${containerEnv:PATH}:/opt/android-sdk/platform-tools:/opt/android-sdk/build-tools/34.0.0:/opt/android-sdk/emulator:/opt/android-sdk/cmdline-tools/latest/bin"
+	},
+	
+	// VS Code customizations
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mathiasfrohlich.Kotlin",
+				"vscjava.vscode-java-pack",
+				"vscjava.vscode-gradle",
+				"redhat.java",
+				"naco-siren.gradle-language"
+			],
+			"settings": {
+				"java.configuration.updateBuildConfiguration": "automatic",
+				"java.home": "/usr/lib/jvm/java-17-openjdk-amd64"
+			}
+		}
+	},
+	
+	// Forward ADB port for device debugging
+	"forwardPorts": [5037],
+	"portsAttributes": {
+		"5037": {
+			"label": "ADB",
+			"onAutoForward": "silent"
+		}
+	},
+	
+	// Lifecycle commands
+	"initializeCommand": "echo 'Preparing Android development environment...'",
+	
+	"onCreateCommand": {
+		"accept-licenses": "yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses",
+		"update-sdk": "/opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --update"
+	},
+	
+	"postStartCommand": "echo 'Android SDK ready. Run ./gradlew tasks to verify Gradle setup.'",
+	
+	// Container user
+	"remoteUser": "vscode",
+	
+	// Keep container running
+	"overrideCommand": false
+}
