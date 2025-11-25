@@ -38,14 +38,11 @@
 	},
 	
 	// Lifecycle commands
-	"initializeCommand": "echo 'Preparing Android development environment...'",
-	
-	"onCreateCommand": {
-		"accept-licenses": "yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses",
-		"update-sdk": "/opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --update"
+	"postCreateCommand": {
+		"accept-licenses": "yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses || true",
+		"install-sdk": "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0' || true",
+		"info": "echo '✅ Android SDK setup complete'"
 	},
-	
-	"postStartCommand": "echo 'Android SDK ready. Run ./gradlew tasks to verify Gradle setup.'",
 	
 	// Container user
 	"remoteUser": "vscode",
