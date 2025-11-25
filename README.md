@@ -22,16 +22,14 @@ This dev container provides a complete Android development stack:
 
 ### Android SDK Components
 - **Platform Tools**: Latest ADB and fastboot
-- **Build Tools**: 34.0.0, 33.0.2
-- **Platforms**: Android 14 (API 34), Android 13 (API 33)
-- **NDK**: Version 26.1.10909125
-- **CMake**: 3.22.1 for native builds
-- **Emulator**: Android Emulator with hardware acceleration support
-- **System Image**: Android 34 Google APIs (x86_64)
+- **Build Tools**: 34.0.0
+- **Platforms**: Android 14 (API 34)
+- **Command-line Tools**: sdkmanager, avdmanager
 
 ### Development Tools
 - **Java**: OpenJDK 17
-- **Gradle**: Wrapper included (version determined by project)
+- **Gradle**: 8.2 (via wrapper)
+- **Kotlin**: 1.9.20
 - **Git**: For version control
 - **VS Code Extensions**:
   - Kotlin language support
@@ -39,11 +37,10 @@ This dev container provides a complete Android development stack:
   - Gradle for Java
   - Red Hat Java support
 
-### Pre-configured AVD
-- **Device**: Pixel 6
-- **API Level**: 34
-- **Target**: Google APIs
-- **Architecture**: x86_64
+### Sample Application
+- Basic Kotlin Android app with Material Design
+- Configured for API 34 (minSdk 24)
+- Ready to build and extend
 
 ## 🔧 Environment Variables
 
@@ -58,35 +55,26 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 The `PATH` includes:
 - `/opt/android-sdk/platform-tools` (adb, fastboot)
 - `/opt/android-sdk/build-tools/34.0.0`
-- `/opt/android-sdk/emulator`
 - `/opt/android-sdk/cmdline-tools/latest/bin` (sdkmanager, avdmanager)
 
 ## 🤖 Automations
 
-### Prebuild Automations
-
-These run during container build to cache dependencies:
-
-1. **install-android-sdk-components**: Installs all SDK components and accepts licences
-2. **warm-gradle-cache**: Pre-downloads Gradle dependencies for faster first build
-
-### Workspace Open Automations
+### Automatic Tasks
 
 These run automatically when the workspace starts:
 
-1. **validate-android-environment**: Verifies ADB, SDK Manager, Java, and Gradle
-2. **display-environment-info**: Shows environment variables and paths
+1. **validateEnvironment**: Verifies ADB, SDK Manager, Java, and Gradle are working
+2. **displayEnvironmentInfo**: Shows environment variables and paths
 
-### Custom Commands
+### Available Tasks
 
-Run these via Ona's command palette or CLI:
+Run these manually via Ona CLI or command palette:
 
-- `emulator-run`: Start the Android emulator
-- `adb-devices`: List connected devices and emulators
-- `build-debug`: Build the app in debug mode (`./gradlew assembleDebug`)
-- `build-release`: Build the app in release mode (`./gradlew assembleRelease`)
-- `clean`: Clean Gradle build cache
-- `update-sdk`: Update Android SDK components
+- **buildDebug**: Build the app in debug mode (`./gradlew assembleDebug`)
+- **buildRelease**: Build the app in release mode (`./gradlew assembleRelease`)
+- **clean**: Clean Gradle build cache
+- **updateSdk**: Update Android SDK components to latest versions
+- **listDevices**: List connected Android devices
 
 ## ✅ Verifying the Environment
 
@@ -126,11 +114,9 @@ OpenJDK Runtime Environment (build 17.0.x+x-Ubuntu-x)
 OpenJDK 64-Bit Server VM (build 17.0.x+x-Ubuntu-x, mixed mode, sharing)
 ```
 
-## 🏗️ Building Your First App
+## 🏗️ Building the App
 
-### Using an Existing Project
-
-If you have an Android project with a `gradlew` wrapper:
+The workspace includes a sample Kotlin Android app ready to build:
 
 ```bash
 # Build debug APK
@@ -142,47 +128,11 @@ If you have an Android project with a `gradlew` wrapper:
 # Run tests
 ./gradlew test
 
-# Install on connected device
+# Install on connected device (requires physical device or external emulator)
 ./gradlew installDebug
-```
 
-### Creating a New Project
-
-1. Use Android Studio's project template or create manually
-2. Ensure `gradlew` wrapper is included
-3. Run `./gradlew tasks` to verify setup
-4. Build with `./gradlew assembleDebug`
-
-## 📱 Using the Emulator
-
-### Starting the Emulator
-
-```bash
-# Via automation command
-ona run emulator-run
-
-# Or manually
-emulator -avd Pixel_6_API_34 -no-snapshot-load &
-```
-
-### Checking Emulator Status
-
-```bash
-# Wait for device to be ready
-adb wait-for-device
-
-# List devices
-adb devices
-```
-
-### Installing APKs
-
-```bash
-# Install debug build
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-
-# Or use Gradle
-./gradlew installDebug
+# List all available tasks
+./gradlew tasks
 ```
 
 ## 🔌 Port Forwarding
@@ -200,7 +150,9 @@ The following ports are automatically forwarded:
 │   └── Dockerfile            # Android SDK installation
 ├── .ona/
 │   └── automations.yaml      # Ona automation definitions
-├── app/                      # Your Android app code (create this)
+├── app/                      # Sample Android app (Kotlin)
+│   ├── build.gradle         # App-level build configuration
+│   └── src/                 # Application source code
 ├── gradle/                   # Gradle wrapper files
 ├── gradlew                   # Gradle wrapper script (Unix)
 ├── gradlew.bat              # Gradle wrapper script (Windows)
@@ -228,19 +180,6 @@ The following ports are automatically forwarded:
 
 # Update Gradle wrapper
 ./gradlew wrapper --gradle-version=8.5
-```
-
-### Emulator Won't Start
-
-```bash
-# Check available AVDs
-emulator -list-avds
-
-# Verify system image is installed
-sdkmanager --list_installed | grep system-images
-
-# Create AVD manually if needed
-avdmanager create avd -n TestDevice -k "system-images;android-34;google_apis;x86_64"
 ```
 
 ### ADB Connection Issues
@@ -287,7 +226,7 @@ sdkmanager --list
 
 **First-time setup**: ~5-10 minutes (container build + SDK download)  
 **Subsequent opens**: ~30 seconds (cached container)  
-**First build**: ~1-2 minutes (Gradle cache pre-warmed)  
+**First build**: ~1-2 minutes (dependency download)  
 **Subsequent builds**: Seconds (incremental)
 
 ---
