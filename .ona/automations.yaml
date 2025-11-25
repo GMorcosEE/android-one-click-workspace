@@ -1,5 +1,12 @@
 # Ona Automations Configuration for Android Development
 
+services:
+    emulator:
+        name: Android Emulator
+        description: Android emulator running Pixel 6 API 34
+        commands:
+            start: emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim -gpu swiftshader_indirect
+
 tasks:
     validateEnvironment:
         name: Validate Android Environment

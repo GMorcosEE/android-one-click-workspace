@@ -2,6 +2,8 @@
 
 A fully configured, self-contained Android development environment using Dev Containers and Ona automations. Zero manual setup required—just open and start coding.
 
+> **Version 2 - Phase 1 Complete**: This workspace now includes a working sample app with launcher icons, unit and instrumentation tests, and a pre-configured Android emulator.
+
 ## 🚀 Quick Start
 
 ### Opening the Workspace
@@ -25,6 +27,8 @@ This dev container provides a complete Android development stack:
 - **Build Tools**: 34.0.0
 - **Platforms**: Android 14 (API 34)
 - **Command-line Tools**: sdkmanager, avdmanager
+- **Emulator**: Android Emulator with software rendering
+- **System Image**: Android 34 Google APIs (x86_64)
 
 ### Development Tools
 - **Java**: OpenJDK 17
@@ -40,7 +44,15 @@ This dev container provides a complete Android development stack:
 ### Sample Application
 - Basic Kotlin Android app with Material Design
 - Configured for API 34 (minSdk 24)
+- Includes launcher icons for all densities
+- Unit tests and instrumentation tests included
 - Ready to build and extend
+
+### Pre-configured AVD
+- **Device**: Pixel 6
+- **API Level**: 34
+- **Target**: Google APIs
+- **Architecture**: x86_64
 
 ## 🔧 Environment Variables
 
@@ -55,6 +67,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 The `PATH` includes:
 - `/opt/android-sdk/platform-tools` (adb, fastboot)
 - `/opt/android-sdk/build-tools/34.0.0`
+- `/opt/android-sdk/emulator`
 - `/opt/android-sdk/cmdline-tools/latest/bin` (sdkmanager, avdmanager)
 
 ## 🤖 Automations
@@ -75,6 +88,12 @@ Run these manually via Ona CLI or command palette:
 - **clean**: Clean Gradle build cache
 - **updateSdk**: Update Android SDK components to latest versions
 - **listDevices**: List connected Android devices
+
+### Services
+
+Long-running services that can be started/stopped:
+
+- **emulator**: Start the Android emulator (Pixel 6 API 34)
 
 ## ✅ Verifying the Environment
 
@@ -114,7 +133,7 @@ OpenJDK Runtime Environment (build 17.0.x+x-Ubuntu-x)
 OpenJDK 64-Bit Server VM (build 17.0.x+x-Ubuntu-x, mixed mode, sharing)
 ```
 
-## 🏗️ Building the App
+## 🏗️ Building and Testing
 
 The workspace includes a sample Kotlin Android app ready to build:
 
@@ -125,14 +144,57 @@ The workspace includes a sample Kotlin Android app ready to build:
 # Build release APK
 ./gradlew assembleRelease
 
-# Run tests
+# Run unit tests
 ./gradlew test
 
-# Install on connected device (requires physical device or external emulator)
+# Run instrumentation tests (requires emulator or device)
+./gradlew connectedAndroidTest
+
+# Install on connected device or emulator
 ./gradlew installDebug
 
 # List all available tasks
 ./gradlew tasks
+```
+
+## 📱 Using the Emulator
+
+### Starting the Emulator
+
+Start the emulator service via Ona:
+
+```bash
+# Via Ona CLI
+gitpod automations service start emulator
+
+# Or manually
+emulator -avd Pixel_6_API_34 -no-snapshot-load &
+```
+
+### Verifying Emulator Status
+
+```bash
+# Wait for device to be ready
+adb wait-for-device
+
+# List devices
+adb devices
+
+# Check if emulator is booted
+adb shell getprop sys.boot_completed
+```
+
+### Installing and Running the App
+
+```bash
+# Install the debug APK
+./gradlew installDebug
+
+# Or manually install
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+# Launch the app
+adb shell am start -n com.example.androiddevenv/.MainActivity
 ```
 
 ## 🔌 Port Forwarding
@@ -182,6 +244,19 @@ The following ports are automatically forwarded:
 ./gradlew wrapper --gradle-version=8.5
 ```
 
+### Emulator Issues
+
+```bash
+# List available AVDs
+emulator -list-avds
+
+# Check emulator version
+emulator -version
+
+# Start with verbose logging
+emulator -avd Pixel_6_API_34 -verbose
+```
+
 ### ADB Connection Issues
 
 ```bash
@@ -191,6 +266,19 @@ adb start-server
 
 # Check devices
 adb devices
+```
+
+### Test Failures
+
+```bash
+# Run tests with more detail
+./gradlew test --info
+
+# Run specific test
+./gradlew test --tests "com.example.androiddevenv.ExampleUnitTest"
+
+# Clean before testing
+./gradlew clean test
 ```
 
 ## 🔄 Updating SDK Components
