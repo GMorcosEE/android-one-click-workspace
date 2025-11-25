@@ -12,18 +12,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         libstdc++6 \
         libgcc-s1 \
         libncurses5 \
-        libpulse0 \
-        libasound2 \
-        libgl1 \
-        libx11-6 \
-        libxext6 \
-        libxrender1 \
-        libxtst6 \
-        libxi6 \
-        qemu-kvm \
-        libvirt-daemon-system \
-        libvirt-clients \
-        bridge-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,15 +43,19 @@ RUN ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
     "emulator" \
     "system-images;android-34;google_apis;x86_64"
 
-# Create AVD (Android Virtual Device) for emulation
+# Set permissions for vscode user (user exists in base image)
+RUN chown -R vscode:vscode ${ANDROID_HOME}
+
+# Switch to vscode user to create AVD in their home directory
+USER vscode
 RUN echo "no" | ${ANDROID_HOME}/cmdline-tools/latest/bin/avdmanager create avd \
     -n "Pixel_6_API_34" \
     -k "system-images;android-34;google_apis;x86_64" \
     -d "pixel_6" \
     || true
 
-# Set permissions for vscode user
-RUN chown -R vscode:vscode ${ANDROID_HOME}
+# Switch back to root for final steps
+USER root
 
 # Set Java home
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
