@@ -179,8 +179,8 @@ Start the emulator service via Ona:
 # Via Ona CLI
 gitpod automations service start emulator
 
-# Or manually
-emulator -avd Pixel_6_API_34 -no-snapshot-load &
+# Or manually (use full path)
+/opt/android-sdk/emulator/emulator -avd Pixel_6_API_34 -no-snapshot-load &
 ```
 
 ### Verifying Emulator Status
