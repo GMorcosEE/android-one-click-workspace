@@ -4,6 +4,18 @@ A fully configured, self-contained Android development environment using Dev Con
 
 > **Version 2 - Phase 1 Complete**: This workspace now includes a working sample app with launcher icons, unit and instrumentation tests, and a pre-configured Android emulator.
 
+## ⚠️ Important: Container Rebuild Required
+
+**If you're on the `version2` branch**, you must rebuild the dev container for the emulator to work:
+
+1. **Stop and delete** the current workspace
+2. **Create a new workspace** from the `version2` branch
+3. Wait for the container to build (~5-10 minutes)
+
+The emulator and its dependencies are installed during the container build process and cannot be added to a running container.
+
+See [REBUILD_REQUIRED.md](REBUILD_REQUIRED.md) for detailed instructions.
+
 ## 🚀 Quick Start
 
 ### Opening the Workspace
