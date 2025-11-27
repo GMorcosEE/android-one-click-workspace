@@ -13,6 +13,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         libxcursor1 \
         libxi6 \
         libxtst6 \
+        libxkbfile1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
