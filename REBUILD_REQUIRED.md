@@ -7,9 +7,10 @@ The `version2` branch includes significant changes to the dev container configur
 ## What Changed
 
 - Added Android Emulator installation
-- Added emulator system dependencies (libpulse0, libgl1, etc.)
-- Created pre-configured AVD (Pixel_6_API_34)
+- Added emulator system dependencies (libpulse0, libgl1, libxkbfile1, etc.)
+- Created pre-configured AVD (Pixel_6_API_34) as vscode user
 - Updated PATH to include emulator directory
+- Fixed AVD creation to run as vscode user (not root)
 
 ## How to Rebuild
 

@@ -5,7 +5,7 @@ services:
         name: Android Emulator
         description: Android emulator running Pixel 6 API 34
         commands:
-            start: /opt/android-sdk/emulator/emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim -gpu swiftshader_indirect
+            start: /opt/android-sdk/emulator/emulator -avd Pixel_6_API_34 -no-snapshot-load -no-audio -no-boot-anim -gpu swiftshader_indirect -no-metrics
 
 tasks:
     validateEnvironment:

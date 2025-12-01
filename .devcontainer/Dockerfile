@@ -41,11 +41,11 @@ RUN yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses && \
         "system-images;android-34;google_apis;x86_64" && \
     chown -R vscode:vscode ${ANDROID_HOME}
 
-# Create default AVD
+# Switch to vscode user before creating AVD
+USER vscode
+
+# Create default AVD as vscode user
 RUN echo "no" | ${ANDROID_HOME}/cmdline-tools/latest/bin/avdmanager create avd \
     -n "Pixel_6_API_34" \
     -k "system-images;android-34;google_apis;x86_64" \
-    -d "pixel_6" && \
-    chown -R vscode:vscode /root/.android
-
-USER vscode
+    -d "pixel_6"
