@@ -1,19 +1,11 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 
-# Install Java, emulator dependencies, and basic tools
+# Install Java and basic tools
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
         openjdk-17-jdk \
         wget \
         unzip \
-        libpulse0 \
-        libgl1 \
-        libnss3 \
-        libxcomposite1 \
-        libxcursor1 \
-        libxi6 \
-        libxtst6 \
-        libxkbfile1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,7 +13,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0:${ANDROID_HOME}/emulator
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/34.0.0
 
 # Download and install Android command-line tools
 RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip && \
@@ -31,21 +23,12 @@ RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-1107
     rm /tmp/cmdline-tools.zip && \
     chown -R vscode:vscode ${ANDROID_HOME}
 
-# Install core Android SDK components including emulator
+# Install core Android SDK components
 RUN yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses && \
     ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
         "platform-tools" \
         "platforms;android-34" \
-        "build-tools;34.0.0" \
-        "emulator" \
-        "system-images;android-34;google_apis;x86_64" && \
+        "build-tools;34.0.0" && \
     chown -R vscode:vscode ${ANDROID_HOME}
 
-# Switch to vscode user before creating AVD
 USER vscode
-
-# Create default AVD as vscode user
-RUN echo "no" | ${ANDROID_HOME}/cmdline-tools/latest/bin/avdmanager create avd \
-    -n "Pixel_6_API_34" \
-    -k "system-images;android-34;google_apis;x86_64" \
-    -d "pixel_6"

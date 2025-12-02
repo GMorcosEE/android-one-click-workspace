@@ -7,8 +7,7 @@
 	
 	"containerEnv": {
 		"ANDROID_HOME": "/opt/android-sdk",
-		"ANDROID_SDK_ROOT": "/opt/android-sdk",
-		"PATH": "/opt/android-sdk/emulator:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/build-tools/34.0.0:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+		"ANDROID_SDK_ROOT": "/opt/android-sdk"
 	},
 	
 	"customizations": {

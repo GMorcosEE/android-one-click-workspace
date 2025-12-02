@@ -2,19 +2,18 @@
 
 A fully configured, self-contained Android development environment using Dev Containers and Ona automations. Zero manual setup required—just open and start coding.
 
-> **Version 2 - Phase 1 Complete**: This workspace now includes a working sample app with launcher icons, unit and instrumentation tests, and a pre-configured Android emulator.
+> **Version 2 - Phase 1 Complete**: This workspace includes a working sample app with launcher icons, unit tests, instrumentation tests, and full Android SDK for building and testing apps.
 
-## ⚠️ Important: Container Rebuild Required
+## ⚠️ About the Android Emulator
 
-**If you're on the `version2` branch**, you must rebuild the dev container for the emulator to work:
+**The Android Emulator is NOT included in this cloud workspace** because:
+- Cloud environments (Gitpod, GitHub Codespaces, etc.) don't provide hardware virtualization (KVM)
+- x86_64 emulators require KVM and won't run without it
+- ARM emulators are too slow to be practical in cloud environments
 
-1. **Stop and delete** the current workspace
-2. **Create a new workspace** from the `version2` branch
-3. Wait for the container to build (~5-10 minutes)
-
-The emulator and its dependencies are installed during the container build process and cannot be added to a running container.
-
-See [REBUILD_REQUIRED.md](REBUILD_REQUIRED.md) for detailed instructions.
+**For testing your apps, you have two options:**
+1. **Connect a physical Android device** (see instructions below)
+2. **Use a local development environment** with Android Studio for emulator support
 
 ## 🚀 Quick Start
 
@@ -39,8 +38,6 @@ This dev container provides a complete Android development stack:
 - **Build Tools**: 34.0.0
 - **Platforms**: Android 14 (API 34)
 - **Command-line Tools**: sdkmanager, avdmanager
-- **Emulator**: Android Emulator with software rendering
-- **System Image**: Android 34 Google APIs (x86_64)
 
 ### Development Tools
 - **Java**: OpenJDK 17
@@ -60,12 +57,6 @@ This dev container provides a complete Android development stack:
 - Unit tests and instrumentation tests included
 - Ready to build and extend
 
-### Pre-configured AVD
-- **Device**: Pixel 6
-- **API Level**: 34
-- **Target**: Google APIs
-- **Architecture**: x86_64
-
 ## 🔧 Environment Variables
 
 The following environment variables are automatically configured:
@@ -79,7 +70,6 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 The `PATH` includes:
 - `/opt/android-sdk/platform-tools` (adb, fastboot)
 - `/opt/android-sdk/build-tools/34.0.0`
-- `/opt/android-sdk/emulator`
 - `/opt/android-sdk/cmdline-tools/latest/bin` (sdkmanager, avdmanager)
 
 ## 🤖 Automations
@@ -101,11 +91,7 @@ Run these manually via Ona CLI or command palette:
 - **updateSdk**: Update Android SDK components to latest versions
 - **listDevices**: List connected Android devices
 
-### Services
 
-Long-running services that can be started/stopped:
-
-- **emulator**: Start the Android emulator (Pixel 6 API 34)
 
 ## ✅ Verifying the Environment
 
@@ -169,44 +155,95 @@ The workspace includes a sample Kotlin Android app ready to build:
 ./gradlew tasks
 ```
 
-## 📱 Using the Emulator
+## 📱 Connecting a Physical Android Device
 
-### Starting the Emulator
+Since the emulator doesn't work in cloud environments, you'll need to connect a physical Android device to test your apps.
 
-Start the emulator service via Ona:
+### Option 1: ADB over USB (Local Development)
+
+If you're running this workspace locally (not in cloud):
+
+1. **Enable Developer Options** on your Android device:
+   - Go to Settings → About Phone
+   - Tap "Build Number" 7 times
+   - Go back to Settings → Developer Options
+   - Enable "USB Debugging"
+
+2. **Connect via USB** and verify:
+   ```bash
+   adb devices
+   ```
+
+3. **Install and run your app**:
+   ```bash
+   ./gradlew installDebug
+   ```
+
+### Option 2: ADB over Network (Cloud Workspace)
+
+Connect your device wirelessly to this cloud workspace:
+
+1. **Connect device to same network** as your computer
+
+2. **Enable USB debugging** (see Option 1)
+
+3. **Connect device via USB initially** to your local machine
+
+4. **Enable TCP/IP mode** on device:
+   ```bash
+   # On your local machine
+   adb tcpip 5555
+   ```
+
+5. **Find device IP address**:
+   - Settings → About Phone → Status → IP Address
+   - Or: `adb shell ip addr show wlan0`
+
+6. **Connect from cloud workspace**:
+   ```bash
+   # In this workspace
+   adb connect <device-ip>:5555
+   ```
+
+7. **Verify connection**:
+   ```bash
+   adb devices
+   # Should show: <device-ip>:5555    device
+   ```
+
+8. **Install and run**:
+   ```bash
+   ./gradlew installDebug
+   ```
+
+### Option 3: Use Android Studio Locally
+
+For the best emulator experience:
+1. Clone this repository locally
+2. Open in Android Studio
+3. Use Android Studio's built-in emulator (has KVM support)
+
+### Verifying Device Connection
 
 ```bash
-# Via Ona CLI
-gitpod automations service start emulator
-
-# Or manually (use full path)
-/opt/android-sdk/emulator/emulator -avd Pixel_6_API_34 -no-snapshot-load &
-```
-
-### Verifying Emulator Status
-
-```bash
-# Wait for device to be ready
-adb wait-for-device
-
-# List devices
+# List connected devices
 adb devices
 
-# Check if emulator is booted
-adb shell getprop sys.boot_completed
-```
+# Check device details
+adb shell getprop ro.product.model
+adb shell getprop ro.build.version.release
 
-### Installing and Running the App
-
-```bash
-# Install the debug APK
+# Install your app
 ./gradlew installDebug
 
-# Or manually install
+# Or manually
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 # Launch the app
 adb shell am start -n com.example.androiddevenv/.MainActivity
+
+# View logs
+adb logcat | grep AndroidDevEnv
 ```
 
 ## 🔌 Port Forwarding
@@ -256,20 +293,7 @@ The following ports are automatically forwarded:
 ./gradlew wrapper --gradle-version=8.5
 ```
 
-### Emulator Issues
-
-```bash
-# List available AVDs
-emulator -list-avds
-
-# Check emulator version
-emulator -version
-
-# Start with verbose logging
-emulator -avd Pixel_6_API_34 -verbose
-```
-
-### ADB Connection Issues
+### Device Connection Issues
 
 ```bash
 # Restart ADB server
@@ -278,6 +302,16 @@ adb start-server
 
 # Check devices
 adb devices
+
+# If device shows as "unauthorized"
+# Check your device screen for authorization prompt
+
+# If ADB over network fails
+# Ensure device and workspace are on same network
+# Try reconnecting: adb connect <device-ip>:5555
+
+# Check ADB version
+adb version
 ```
 
 ### Test Failures
